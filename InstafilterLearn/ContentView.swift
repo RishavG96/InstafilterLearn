@@ -31,6 +31,8 @@ struct ContentView: View {
     
     
     @State private var image: Image?
+    @State private var inputImage: UIImage?
+    @State private var showingImagePicker = false
     
     var body: some View {
 //        VStack {
@@ -66,8 +68,26 @@ struct ContentView: View {
             image?
                 .resizable()
                 .scaledToFit()
+            
+            Button("Select Image") {
+                showingImagePicker = true
+            }
+            
+            Button("Save Image") {
+                guard let inputImage = inputImage else { return }
+                
+                let imageSaver = ImageSaver()
+                imageSaver.writeToPhotoAlbum(image: inputImage)
+            }
         }
         .onAppear(perform: loadImage)
+        .sheet(isPresented: $showingImagePicker) {
+            ImagePicker(image: $inputImage)
+        }
+        .onChange(of: inputImage) { _ in
+            loadUIImage()
+        }
+        
     }
     
     // UIKit ->
@@ -121,6 +141,14 @@ struct ContentView: View {
             let uiImage = UIImage(cgImage: cgImage)
             image = Image(uiImage: uiImage)
         }
+    }
+    
+    func loadUIImage() {
+        guard let inputImage = inputImage else { return }
+        
+        image = Image(uiImage: inputImage)
+        
+        
     }
 }
 
